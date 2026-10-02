@@ -27,3 +27,8 @@ typedef struct {
 _Static_assert(sizeof(Pixel) == 3, "Pixel precisa ocupar exatamente 3 bytes");
 
 #define CHAVE_PADRAO "senha-do-grupo-123"
+
+void load(const char* name, Img* pic);
+void save(const char* name, const Img* pic);
+Img nova_img(const Img* modelo);
+size_t qtd_pixels(const Img* pic);
