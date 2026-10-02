@@ -32,3 +32,10 @@ void load(const char* name, Img* pic);
 void save(const char* name, const Img* pic);
 Img nova_img(const Img* modelo);
 size_t qtd_pixels(const Img* pic);
+
+typedef enum {
+  ETAPA_CONFUSAO,
+  ETAPA_DIFUSAO,
+  ETAPA_DESFAZ_DIFUSAO,
+  ETAPA_DESFAZ_CONFUSAO
+} Etapa;
