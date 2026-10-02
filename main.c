@@ -22,3 +22,8 @@ typedef struct {
   int channels;      
   Pixel* pixels;
 } Img;
+
+
+_Static_assert(sizeof(Pixel) == 3, "Pixel precisa ocupar exatamente 3 bytes");
+
+#define CHAVE_PADRAO "senha-do-grupo-123"
