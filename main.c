@@ -39,3 +39,33 @@ typedef enum {
   ETAPA_DESFAZ_DIFUSAO,
   ETAPA_DESFAZ_CONFUSAO
 } Etapa;
+
+
+void aplica_etapa(Etapa etapa, Img* in, Img* out, const char* chave) {
+  size_t n = qtd_pixels(in);
+  unsigned char* pin = (unsigned char*)in->pixels;
+  unsigned char* pout = (unsigned char*)out->pixels;
+  int erro = 0;
+
+  switch (etapa) {
+    case ETAPA_CONFUSAO:  // muda VALORES, posicoes ficam iguais
+      memcpy(pout, pin, n * sizeof(Pixel));
+      confusion_apply(pout, in->width, in->height, chave);
+      break;
+    case ETAPA_DESFAZ_CONFUSAO:
+      memcpy(pout, pin, n * sizeof(Pixel));
+      confusion_invert(pout, in->width, in->height, chave);
+      break;
+    case ETAPA_DIFUSAO:  // muda POSICOES, valores ficam iguais
+      erro = diffusion_apply(pin, pout, in->width, in->height, chave);
+      break;
+    case ETAPA_DESFAZ_DIFUSAO:
+      erro = diffusion_invert(pin, pout, in->width, in->height, chave);
+      break;
+  }
+
+  if (erro) {
+    printf("Erro: memoria insuficiente para a permutacao da difusao\n");
+    exit(1);
+  }
+}
