@@ -69,3 +69,20 @@ void aplica_etapa(Etapa etapa, Img* in, Img* out, const char* chave) {
     exit(1);
   }
 }
+
+// encode = confusao, depois difusao
+void encode(Img* in, Img* out, const char* chave) {
+  Img tmp = nova_img(in);
+  aplica_etapa(ETAPA_CONFUSAO, in, &tmp, chave);
+  aplica_etapa(ETAPA_DIFUSAO, &tmp, out, chave);
+  free(tmp.pixels);
+}
+
+// decode = ordem inversa do encode (como uma pilha):
+// desfaz a difusao primeiro, depois a confusao
+void decode(Img* in, Img* out, const char* chave) {
+  Img tmp = nova_img(in);
+  aplica_etapa(ETAPA_DESFAZ_DIFUSAO, in, &tmp, chave);
+  aplica_etapa(ETAPA_DESFAZ_CONFUSAO, &tmp, out, chave);
+  free(tmp.pixels);
+}
