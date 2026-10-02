@@ -86,3 +86,17 @@ void decode(Img* in, Img* out, const char* chave) {
   aplica_etapa(ETAPA_DESFAZ_CONFUSAO, &tmp, out, chave);
   free(tmp.pixels);
 }
+
+// Compara duas imagens byte a byte. Retorna a qtd de bytes diferentes,
+// ou -1 se as dimensoes nao coincidem.
+long compara(const Img* a, const Img* b) {
+  if (a->width != b->width || a->height != b->height) return -1;
+  size_t tam = qtd_pixels(a) * sizeof(Pixel);
+  const unsigned char* pa = (const unsigned char*)a->pixels;
+  const unsigned char* pb = (const unsigned char*)b->pixels;
+  long diffs = 0;
+  for (size_t i = 0; i < tam; i++) {
+    if (pa[i] != pb[i]) diffs++;
+  }
+  return diffs;
+}
