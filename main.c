@@ -11,3 +11,14 @@
 
 #include "confusion.h"
 #include "diffusion.h"
+
+typedef struct {
+  unsigned char r, g, b;
+} Pixel;
+
+
+typedef struct {
+  int width, height; 
+  int channels;      
+  Pixel* pixels;
+} Img;
