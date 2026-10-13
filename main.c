@@ -135,3 +135,50 @@ void nome_saida(char* dest, size_t cap, const char* origem, const char* sufixo) 
   if (ponto && ponto != base) len = (size_t)(ponto - base);
   snprintf(dest, cap, "%.*s%s", (int)len, base, sufixo);
 }
+
+// Demonstracao completa (modo do codigo-base: ./bagunceitor imagem [chave])
+int demo(const char* origem, const char* chave) {
+  Img in, out;
+  load(origem, &in);
+  printf("Origem   : %s %d x %d\n", origem, in.width, in.height);
+  printf("Chave    : \"%s\"\n", chave);
+  printf("Processando...\n");
+  
+  char nome[1024];
+  out = nova_img(&in);
+  
+  // 1) So confusao: valores mudam, posicoes nao
+  aplica_etapa(ETAPA_CONFUSAO, &in, &out, chave);
+  nome_saida(nome, sizeof nome, origem, "_1_so_confusao.png");
+  save(nome, &out);
+  
+  // 2) So difusao (sobre a ORIGINAL): posicoes mudam, cores nao
+  aplica_etapa(ETAPA_DIFUSAO, &in, &out, chave);
+  nome_saida(nome, sizeof nome, origem, "_2_so_difusao.png");
+  save(nome, &out);
+  
+  // 3) Confusao + difusao = imagem embaralhada
+  encode(&in, &out, chave);
+  nome_saida(nome, sizeof nome, origem, "_3_embaralhada.png");
+  save(nome, &out);
+  printf("Bytes diferentes do original: %ld de %zu\n", compara(&in, &out),
+         qtd_pixels(&in) * sizeof(Pixel));
+  
+  // 4) Recupera a partir da embaralhada
+  Img rec = nova_img(&in);
+  decode(&out, &rec, chave);
+  nome_saida(nome, sizeof nome, origem, "_4_recuperada.png");
+  save(nome, &rec);
+  
+  long diffs = compara(&in, &rec);
+  if (diffs == 0) {
+    printf("IDENTICAS: a imagem recuperada e byte a byte igual a original\n");
+  } else {
+    printf("DIFERENTES: %ld bytes divergem na recuperacao\n", diffs);
+  }
+  
+  free(in.pixels);
+  free(out.pixels);
+  free(rec.pixels);
+  return diffs == 0 ? 0 : 2;
+}
