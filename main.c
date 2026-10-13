@@ -202,3 +202,12 @@ int comando(const char* cmd, const char* origem, const char* destino, const char
   free(out.pixels);
   return 0;
 }
+
+void uso(void) {
+  printf("Uso:\n"
+         "  bagunceitor <imagem> [chave]                    demonstracao completa\n"
+         "  bagunceitor encode <entrada> <saida.png> <chave>\n"
+         "  bagunceitor decode <entrada.png> <saida.png> <chave>\n"
+         "  bagunceitor verify <imagem1> <imagem2>\n"
+         "  bagunceitor confusao|difusao|desfaz-difusao|desfaz-confusao <entrada> <saida.png> <chave>\n");
+}
