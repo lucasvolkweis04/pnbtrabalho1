@@ -257,3 +257,30 @@ void load(const char* name, Img* pic) {
   }
   printf("Load: %s %d x %d x %d\n", name, pic->width, pic->height, pic->channels);
 }
+
+// Grava em PNG ou BMP (sem perda). JPG e recusado: a compressao com perda
+// mudaria os bytes da imagem embaralhada e o decode nao recuperaria nada.
+void save(const char* name, const Img* pic) {
+  const char* ext = strrchr(name, '.');
+  char e[8] = "";
+  if (ext) {
+    for (int i = 0; ext[i + 1] && i < 7; i++) e[i] = (char)tolower((unsigned char)ext[i + 1]);
+  }
+  
+  int ok;
+  if (strcmp(e, "png") == 0) {
+    ok = stbi_write_png(name, pic->width, pic->height, 3, pic->pixels, 0);
+  } else if (strcmp(e, "bmp") == 0) {
+    ok = stbi_write_bmp(name, pic->width, pic->height, 3, pic->pixels);
+  } else {
+    printf("Erro: '%s' precisa terminar em .png ou .bmp (formatos sem perda).\n"
+           "JPG altera os bytes ao comprimir e impediria a recuperacao exata.\n",
+           name);
+    exit(1);
+  }
+  if (!ok) {
+    printf("Erro ao gravar '%s'\n", name);
+    exit(1);
+  }
+ printf("Gravada  : %s\n", name);
+}
