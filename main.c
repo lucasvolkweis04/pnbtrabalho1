@@ -123,3 +123,15 @@ int verify(const char* nome_a, const char* nome_b) {
   free(b.pixels);
   return diffs == 0 ? 0 : 2;
 }
+
+// Monta "<nome da imagem sem pasta e sem extensao><sufixo>"
+void nome_saida(char* dest, size_t cap, const char* origem, const char* sufixo) {
+  const char* base = origem;
+  for (const char* p = origem; *p; p++) {
+    if (*p == '/' || *p == '\\') base = p + 1;
+  }
+  size_t len = strlen(base);
+  const char* ponto = strrchr(base, '.');
+  if (ponto && ponto != base) len = (size_t)(ponto - base);
+  snprintf(dest, cap, "%.*s%s", (int)len, base, sufixo);
+}
