@@ -284,3 +284,19 @@ void save(const char* name, const Img* pic) {
   }
  printf("Gravada  : %s\n", name);
 }
+
+// Cria uma imagem com as mesmas dimensoes de 'modelo', zerada
+Img nova_img(const Img* modelo) {
+  Img img = *modelo;
+  size_t tam = qtd_pixels(modelo);
+  img.pixels = calloc(tam > 0 ? tam : 1, sizeof(Pixel));
+  if (!img.pixels) {
+    printf("Erro: memoria insuficiente\n");
+    exit(1);
+  }
+  return img;
+}
+ 
+size_t qtd_pixels(const Img* pic) {
+  return (size_t)pic->width * (size_t)pic->height;
+}
