@@ -100,3 +100,26 @@ long compara(const Img* a, const Img* b) {
   }
   return diffs;
 }
+
+int verify(const char* nome_a, const char* nome_b) {
+  Img a, b;
+  load(nome_a, &a);
+  load(nome_b, &b);
+  long diffs = compara(&a, &b);
+  size_t tam = qtd_pixels(&a) * sizeof(Pixel);
+  
+  if (diffs < 0) {
+    printf("DIFERENTES: dimensoes nao coincidem (%d x %d vs %d x %d)\n",
+           a.width, a.height, b.width, b.height);
+  } else if (diffs == 0) {
+    printf("IDENTICAS: os %zu bytes de pixel de '%s' e '%s' sao byte a byte iguais\n",
+           tam, nome_a, nome_b);
+  } else {
+    printf("DIFERENTES: %ld de %zu bytes de pixel divergem entre '%s' e '%s'\n",
+           diffs, tam, nome_a, nome_b);
+  }
+  
+  free(a.pixels);
+  free(b.pixels);
+  return diffs == 0 ? 0 : 2;
+}
