@@ -244,3 +244,16 @@ int main(int argc, char* argv[]) {
   }
   return demo(argv[1], argc == 3 ? argv[2] : CHAVE_PADRAO);
 }
+
+void load(const char* name, Img* pic) {
+  // Pede sempre 3 canais: se o arquivo tiver alfa (PNG RGBA) ou for
+  // tons de cinza, o stb converte para RGB e o vetor de Pixel continua
+  // valido. Com 0 aqui, uma imagem RGBA seria lida errado como Pixel.
+  pic->pixels =
+      (Pixel*)stbi_load(name, &pic->width, &pic->height, &pic->channels, 3);
+  if (!pic->pixels) {
+    printf("Erro de leitura (%s): %s\n", name, stbi_failure_reason());
+    exit(1);
+  }
+  printf("Load: %s %d x %d x %d\n", name, pic->width, pic->height, pic->channels);
+}
