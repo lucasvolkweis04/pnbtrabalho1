@@ -182,3 +182,23 @@ int demo(const char* origem, const char* chave) {
   free(rec.pixels);
   return diffs == 0 ? 0 : 2;
 }
+
+// Um comando do tipo: ./bagunceitor <comando> <entrada> <saida> <chave>
+int comando(const char* cmd, const char* origem, const char* destino, const char* chave) {
+  Img in, out;
+  load(origem, &in);
+  printf("Origem   : %s %d x %d\n", origem, in.width, in.height);
+  out = nova_img(&in);
+  
+  if (strcmp(cmd, "encode") == 0) encode(&in, &out, chave);
+  else if (strcmp(cmd, "decode") == 0) decode(&in, &out, chave);
+  else if (strcmp(cmd, "confusao") == 0) aplica_etapa(ETAPA_CONFUSAO, &in, &out, chave);
+  else if (strcmp(cmd, "difusao") == 0) aplica_etapa(ETAPA_DIFUSAO, &in, &out, chave);
+  else if (strcmp(cmd, "desfaz-difusao") == 0) aplica_etapa(ETAPA_DESFAZ_DIFUSAO, &in, &out, chave);
+  else aplica_etapa(ETAPA_DESFAZ_CONFUSAO, &in, &out, chave);
+  
+  save(destino, &out);
+  free(in.pixels);
+  free(out.pixels);
+  return 0;
+}
