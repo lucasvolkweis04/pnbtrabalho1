@@ -211,3 +211,36 @@ void uso(void) {
          "  bagunceitor verify <imagem1> <imagem2>\n"
          "  bagunceitor confusao|difusao|desfaz-difusao|desfaz-confusao <entrada> <saida.png> <chave>\n");
 }
+
+int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    uso();
+    exit(1);
+  }
+  
+  static const char* comandos[] = {"encode", "decode", "confusao", "difusao",
+                                   "desfaz-difusao", "desfaz-confusao"};
+  for (size_t i = 0; i < sizeof comandos / sizeof comandos[0]; i++) {
+    if (strcmp(argv[1], comandos[i]) == 0) {
+      if (argc != 5) {
+        uso();
+        exit(1);
+      }
+      return comando(argv[1], argv[2], argv[3], argv[4]);
+    }
+  }
+  if (strcmp(argv[1], "verify") == 0) {
+    if (argc != 4) {
+      uso();
+      exit(1);
+    }
+    return verify(argv[2], argv[3]);
+  }
+  
+  // Sem comando: modo do codigo-base, ./bagunceitor imagem [chave]
+  if (argc > 3) {
+    uso();
+    exit(1);
+  }
+  return demo(argv[1], argc == 3 ? argv[2] : CHAVE_PADRAO);
+}
