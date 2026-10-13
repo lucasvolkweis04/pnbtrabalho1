@@ -26,7 +26,6 @@ include/
   prng.h, confusion.h, diffusion.h
   stb_image.h, stb_image_write.h   (bibliotecas do código-base)
 predio32.jpg      imagem de exemplo do código-base (1280×960)
-imagens/          outras imagens de teste
 relatorio/        RELATORIO.md (regras, prova de reversibilidade, uso de memória)
 Makefile, CMakeLists.txt, .vscode/   (build do código-base)
 ```

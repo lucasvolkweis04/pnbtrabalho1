@@ -185,26 +185,84 @@ recuperação — a chave é indispensável tanto para desfazer a confusão
 quanto a difusão, já que ambas derivam sua sequência pseudoaleatória
 dela.
 
-## 4. Uso de memória
+## 4. Uso de memória: ponteiros e aritmética
 
-Toda a manipulação acontece em cima de vetores alocados com
-`malloc`/`calloc` e liberados com `free`, sem escrever/ler arquivos
-intermediários entre os passos de confusão e difusão:
+Toda a manipulação ocorre em vetores contíguos alocados com `malloc`/`calloc`
+e liberados com `free`, sem arquivos intermediários entre as etapas.
 
-- `load()` (via `stbi_load`) aloca um único vetor de
-  `largura × altura` pixels (3 bytes cada) para a imagem de entrada.
-- `nova_img()` aloca a imagem de saída com as mesmas dimensões, como o
-  `out` do código-base. `encode`/`decode` usam ainda uma imagem
-  intermediária do mesmo tamanho entre as duas etapas.
-- `confusion_apply`/`confusion_invert` operam **in-place** no vetor de
-  saída, bloco a bloco (não alocam memória extra).
-- `diffusion_apply`/`diffusion_invert` leem de `pin` e escrevem em
-  `pout` (uma permutação geral precisa de dois vetores). Eles alocam o
-  vetor `dest` (`largura × altura` valores de `size_t`), o vetor das
-  peças e os vetores da sobra, e liberam todos antes de retornar.
-- `stbi_write_png` grava o vetor final direto para o arquivo, e todos os
-  vetores são liberados com `free` ao final.
+### 4.1 Vetor de `Pixel` visto como bytes (`main.c`)
 
-Testado com `make test` e com AddressSanitizer/UBSan (imagens JPG, PNG
-com canal alfa, tons de cinza, BMP e 1×1), sem erros de memória.
+```c
+unsigned char* pin  = (unsigned char*)in->pixels;
+unsigned char* pout = (unsigned char*)out->pixels;
+memcpy(pout, pin, n * sizeof(Pixel));
+```
 
+`stbi_load` devolve os pixels em um único bloco. O *cast* para
+`unsigned char*` permite tratá-lo como a sequência R,G,B,R,G,B…, e o
+`_Static_assert(sizeof(Pixel) == 3)` garante que não há *padding*.
+
+### 4.2 Endereço de um pixel por aritmética de ponteiros (`confusion.c`)
+
+```c
+op(data + ((size_t)y * (size_t)width + (size_t)x) * 3, &t);
+```
+
+O pixel (x, y) começa em `data + (y*largura + x) * 3`. O ponteiro `px`
+recebido aponta para o primeiro byte do pixel, e `px[0]`, `px[1]`, `px[2]`
+(equivalentes a `*(px+0)`, `*(px+1)`, `*(px+2)`) são R, G e B. Os blocos
+são percorridos por varredura, e a função de cada pixel (`aplica_pixel` ou
+`desfaz_pixel`) é passada por **ponteiro para função**, de modo que a mesma
+varredura serve para aplicar e para desfazer.
+
+A tabela `PERMS[6][3]` é lida por ponteiro: `t.perm = PERMS[a % 6u]`
+guarda o endereço da linha sorteada, e `in[t->perm[c]]` indexa o canal.
+
+### 4.3 Mover pixels pela memória (`diffusion.c`)
+
+```c
+/* aplicar (scatter) */
+memcpy(dst + dest[i] * BYTES_PER_PIXEL, src + i * BYTES_PER_PIXEL, BYTES_PER_PIXEL);
+/* desfazer (gather) */
+memcpy(dst + i * BYTES_PER_PIXEL, src + dest[i] * BYTES_PER_PIXEL, BYTES_PER_PIXEL);
+```
+
+O vetor `dest` (um `size_t` por pixel, alocado com `malloc`) guarda o
+destino de cada pixel. A posição final dentro de uma peça é calculada por
+aritmética de índices:
+
+```c
+dest[i] = ((d / bw) * B + dy) * w + (d % bw) * B + dx;
+```
+
+em que `d` é a peça de destino, `(dx, dy)` o deslocamento dentro da peça e
+`w` a largura. Aplicar e desfazer diferem só em qual lado leva o `dest[i]`.
+O `src` é lido e o `dst` é escrito em vetores diferentes, pois uma
+permutação geral não pode ser feita sem cópia.
+
+### 4.4 Ponteiro percorrendo a chave (`prng.c`)
+
+```c
+for (const unsigned char *p = (const unsigned char *)key; *p; p++) {
+    hash ^= *p;
+    hash *= 16777619u;
+}
+```
+
+O ponteiro `p` avança byte a byte pela *string* da chave até o `'\0'`.
+
+### 4.5 Alocação e liberação
+
+| Onde | Alocação | Liberação |
+|---|---|---|
+| `load()` | `stbi_load` (imagem de entrada) | `free(in.pixels)` |
+| `nova_img()` | `calloc` (saída e intermediária) | `free(...)` ao fim de cada comando |
+| `build_destinations()` | `dest`, `pecas`, `sobra`, `perm_sobra` | os três auxiliares com `free` dentro da função; `dest` após o uso |
+
+`confusion_*` opera *in-place* e não aloca. 
+
+## Uso de IA
+
+Conforme exigido no enunciado, declaramos o uso de IA neste trabalho:
+
+- **Documentação e organização:** usamos IA (Claude) para estruturar e redigir o `README.md` e este relatório em Markdown, para organizar o trabalho (roteiro, checklist de requisitos) e para diagnosticar o erro de compilação (Makefile).
