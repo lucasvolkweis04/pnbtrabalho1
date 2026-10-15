@@ -1,6 +1,7 @@
 # Relatório — Confusão e Difusão em Imagens (Baixo Nível)
 
 **Repositório GitHub:** _(https://github.com/lucasvolkweis04/pnbtrabalho1.git)_
+**Vídeo Youtube Não Listado** _(https://youtu.be/ujaqXGNqfJA)_
 **Membros do grupo:** _(Eduarda Fuchs e Lucas Volkweis)_
 
 ## 1. A imagem digital na memória
